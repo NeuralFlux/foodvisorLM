@@ -1,0 +1,12 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Search{% endblock %}
+{% block content %}
+  <form method="POST" class="form">
+    {{ form.csrf_token }}
+    {{ form.gtin(class_ = 'form-control first-input', placeholder = form.gtin.label.text, required = true, autofocus = true) }}
+    <input type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
+  </form>
+  {% if ingredients %}
+    <h1>{{ ingredients }}</h1>
+  {% endif %}
+{% endblock %}

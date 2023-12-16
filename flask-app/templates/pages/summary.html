@@ -1,0 +1,34 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Product Breakdown{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="page-header">
+    <h1>Ingredients</h1>
+  </div>
+
+  {% if ing_label_dict %}
+    <div class="list-group">
+      {% for ingredient, label in ing_label_dict.items() %}
+        {% if label == "mostly safe" %}
+            <div class="list-group-item list-group-item-success">
+        {% elif label == "controversial" %}
+            <div class="list-group-item list-group-item-warning">
+        {% elif label == "not recommended" %}
+            <div class="list-group-item list-group-item-danger">
+        {% elif label == "unknown" %}
+            <div class="list-group-item list-group-item-secondary">
+        {% endif %}
+          <h5 class="mb-1">{{ ingredient }} - {{ label }}</h5>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      No ingredients found.
+    </div>
+  {% endif %}
+</div>
+
+
+{% endblock %}
