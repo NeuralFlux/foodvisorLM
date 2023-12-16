@@ -1,6 +1,6 @@
 {
     "flask": {
-        "image": ":foodvisor-lm-service.flask-app-container.1",
+        "image": ":foodvisor-lm-service.flask-app-container.3",
         "ports": {
             "5000": "HTTP"
         }

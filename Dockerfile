@@ -8,13 +8,10 @@ EXPOSE 5000/tcp
 WORKDIR /app
 
 # Copy the dependencies file to the working directory
-COPY flask-app/requirements.txt .
+ADD flask-app .
 
 # Install any dependencies
 RUN pip install -r requirements.txt
-
-# Copy the content of the local src directory to the working directory
-COPY flask-app/app.py .
 
 # Specify the command to run on container start
 CMD [ "python", "./app.py" ]
