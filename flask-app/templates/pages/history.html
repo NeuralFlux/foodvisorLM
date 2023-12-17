@@ -1,0 +1,37 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Scan History{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="page-header">
+    <h1>History</h1>
+  </div>
+
+  {% if history %}
+    <div class="list-group">
+      {% for ingredient, label in history.items() %}
+        <div class="list-group-item list-group-item-dark">
+          <h5 class="mb-1">{{ label }}</h5>
+        </div>
+        {% if label == "mostly safe" %}
+            <div class="list-group-item list-group-item-success">
+        {% elif label == "controversial" %}
+            <div class="list-group-item list-group-item-warning">
+        {% elif label == "not recommended" %}
+            <div class="list-group-item list-group-item-danger">
+        {% elif label == "unknown" %}
+            <div class="list-group-item list-group-item-secondary">
+        {% endif %}
+          <h5 class="mb-1">{{ ingredient }} - {{ label }}</h5>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      No history found.
+    </div>
+  {% endif %}
+</div>
+
+
+{% endblock %}
