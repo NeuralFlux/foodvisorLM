@@ -2,7 +2,6 @@ import os
 import json
 import requests
 from urllib import parse
-import pprint
 
 from functools import wraps
 from flask import Flask, flash, render_template, request, session, url_for, redirect
@@ -15,6 +14,9 @@ import inference
 app = Flask(__name__)
 app.config.from_object('config')
 csrf = CSRFProtect()
+
+PORT = app.config.get("PORT")
+SCHEME_DICT = {f"localhost:{PORT}": "http"}
 
 
 def login_required(f):
@@ -38,6 +40,12 @@ def login():
         session["sid"] = request.args.get("code")
         return redirect(url_for('search'))
     else:
+        parsed_url = parse.urlparse(request.url)
+        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
+        safe_redirect_url = parse.quote(
+            f"{scheme}://{parsed_url.netloc}{url_for('login')}",
+            safe=""
+        )
         safe_redirect_url = parse.quote(request.url, safe="")
         return redirect(f"https://foodvisor-lm.auth.us-east-1.amazoncognito.com/login?client_id=4fsa9c9emuj8up23oekojflnt8&response_type=code&scope=email+openid&redirect_uri={safe_redirect_url}")
 
@@ -45,14 +53,13 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    print("Logging out")
     if "sid" in session.keys():
-        print("session present")
         session.pop("sid")
 
         parsed_url = parse.urlparse(request.url)
+        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
         safe_redirect_url = parse.quote(
-            f"{parsed_url.scheme}://{parsed_url.netloc}{url_for('index')}",
+            f"{scheme}://{parsed_url.netloc}{url_for('index')}",
             safe=""
         )
         return redirect(f"https://foodvisor-lm.auth.us-east-1.amazoncognito.com/logout?client_id=4fsa9c9emuj8up23oekojflnt8&logout_uri={safe_redirect_url}")
@@ -88,4 +95,4 @@ def search():
     return render_template("forms/search.html", form=form)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=PORT)
