@@ -3,34 +3,36 @@
 {% block content %}
 
 <div class="container mt-4">
-  <div class="page-header">
+<div class="page-header">
     <h1>History</h1>
-  </div>
+</div>
 
-  {% if history %}
-    <div class="list-group">
-      {% for ingredient, label in history.items() %}
+{% if history %}
+    {% for product in history %}
         <div class="list-group-item list-group-item-dark">
-          <h5 class="mb-1">{{ label }}</h5>
+            <h5 class="mb-1">{{ product.gtin }}</h5>
         </div>
-        {% if label == "mostly safe" %}
-            <div class="list-group-item list-group-item-success">
-        {% elif label == "controversial" %}
-            <div class="list-group-item list-group-item-warning">
-        {% elif label == "not recommended" %}
-            <div class="list-group-item list-group-item-danger">
-        {% elif label == "unknown" %}
-            <div class="list-group-item list-group-item-secondary">
-        {% endif %}
-          <h5 class="mb-1">{{ ingredient }} - {{ label }}</h5>
+        <div class="list-group">
+            {% for ingredient, label in product.labels.items() %}
+            {% if label == "mostly safe" %}
+                <div class="list-group-item list-group-item-success">
+            {% elif label == "controversial" %}
+                <div class="list-group-item list-group-item-warning">
+            {% elif label == "not recommended" %}
+                <div class="list-group-item list-group-item-danger">
+            {% elif label == "unknown" %}
+                <div class="list-group-item list-group-item-secondary">
+            {% endif %}
+                <h5 class="mb-1">{{ ingredient }} - {{ label }}</h5>
+            </div>
+            {% endfor %}
         </div>
-      {% endfor %}
-    </div>
-  {% else %}
+    {% endfor %}
+{% else %}
     <div class="alert alert-info" role="alert">
-      No history found.
+    No history found.
     </div>
-  {% endif %}
+{% endif %}
 </div>
 
 
