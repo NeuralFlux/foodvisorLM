@@ -23,7 +23,7 @@ def login_required(f):
 
     @wraps(f)
     def login_enforcer(*args, **kwargs):
-        if not "sid" in session:
+        if not "email" in session:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
 
@@ -37,7 +37,35 @@ def index():
 @app.route('/login')
 def login():
     if "code" in request.args:
-        session["sid"] = request.args.get("code")
+        auth_code = request.args.get("code")
+        url = "https://foodvisor-lm.auth.us-east-1.amazoncognito.com/oauth2/token"
+
+        parsed_url = parse.urlparse(request.url)
+        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
+        safe_redirect_url = parse.quote(
+            f"{scheme}://{parsed_url.netloc}{url_for('login')}",
+            safe=""
+        )
+
+        payload = f'client_id=4fsa9c9emuj8up23oekojflnt8&grant_type=authorization_code&redirect_uri={safe_redirect_url}&code={auth_code}'
+        headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload).json()
+
+        session["id_token"] = response["id_token"]
+        session["access_token"] = response["access_token"]
+        session["refresh_token"] = response["refresh_token"]
+
+        url = "https://foodvisor-lm.auth.us-east-1.amazoncognito.com/oauth2/userInfo"
+        headers = {
+            'Authorization': f'Bearer {session["access_token"]}'
+        }
+        response = requests.request("GET", url, headers=headers, data={}).json()
+
+        session["email"] = response["email"]
+
         return redirect(url_for('search'))
     else:
         parsed_url = parse.urlparse(request.url)
@@ -46,15 +74,18 @@ def login():
             f"{scheme}://{parsed_url.netloc}{url_for('login')}",
             safe=""
         )
-        safe_redirect_url = parse.quote(request.url, safe="")
+
         return redirect(f"https://foodvisor-lm.auth.us-east-1.amazoncognito.com/login?client_id=4fsa9c9emuj8up23oekojflnt8&response_type=code&scope=email+openid&redirect_uri={safe_redirect_url}")
 
 
 @app.route('/logout')
 @login_required
 def logout():
-    if "sid" in session.keys():
-        session.pop("sid")
+    if "email" in session.keys():
+        session.pop("email")
+        session.pop("id_token")
+        session.pop("access_token")
+        session.pop("refresh_token")
 
         parsed_url = parse.urlparse(request.url)
         scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
