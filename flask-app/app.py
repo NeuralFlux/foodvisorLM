@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from urllib import parse
+import time
 
 from functools import wraps
 from flask import Flask, flash, render_template, request, session, url_for, redirect
@@ -32,7 +33,8 @@ def login_required(f):
 
 @app.route('/')
 def index():
-    return render_template("pages/index.html", login_missing=True)
+    login_missing = "email" not in session
+    return render_template("pages/index.html", login_missing=login_missing)
 
 @app.route('/login')
 def login():
@@ -100,8 +102,19 @@ def logout():
 @app.route('/history')
 @login_required
 def history():
-    resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v1/history")
-    history = resp.json()["body-json"]["Items"]
+    resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}")
+    history = resp.json()["Items"]
+
+    # sample DynamoDB response
+    # {"Items":[{"stringified_labels_json":{"S":"str"},"created_at":\
+    # {"N":"str"},"gtin_upc":{"S":"str"},"user_email":{"S":"str"}}]}
+    for idx in range(len(history)):
+        for key in history[idx].keys():
+            for dtype in history[idx][key].keys():
+                history[idx][key] = history[idx][key][dtype]
+            if key == "stringified_labels_json":
+                # FIXME json string alternatives
+                history[idx][key] = json.loads(history[idx][key].replace("'", "\""))
 
     return render_template('pages/history.html', history=history)
 
@@ -119,6 +132,15 @@ def search():
 
             lang_model_resp = inference.get_lang_model_response(ingredients)
             ing_label_dict = json.loads(json.loads(lang_model_resp)['content'])
+
+            # add to user history
+            #FIXME find stringified json alternatives
+            created_at = int(time.time())
+            labels_json = parse.quote(json.dumps(ing_label_dict).replace("\"", "'"), safe="")
+            url = f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
+            print(url)
+            user_hist_resp = requests.post(url)
+            print(user_hist_resp.content)
 
             # TODO labels of ingredients ENUM in inference and template
             return render_template("pages/summary.html", ing_label_dict=ing_label_dict)
