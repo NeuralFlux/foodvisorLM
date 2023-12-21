@@ -2,3 +2,5 @@ Flask==3.0.0
 Flask-WTF==1.2.1
 openai==1.4.0
 requests==2.31.0
+pyzbar[scripts]==0.1.9
+opencv-python==4.8.1.78

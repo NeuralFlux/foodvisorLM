@@ -131,8 +131,10 @@ def search():
             b64_str = form.barcode_image.data
             barcode = bcode_reader.detect_bcode(b64_str)
 
+            if barcode is None:
+                flash("Invalid barcode, please try again")
+                return redirect(url_for('search'))
             gtin_upc = int(barcode.rjust(14, "0"))
-            print(gtin_upc)
 
             resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v1/gtin_table?gtin_upc={gtin_upc}")
             ingredients = resp.json()["body-json"]["Item"]["ingredients"]["S"]
