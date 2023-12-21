@@ -147,9 +147,7 @@ def search():
             created_at = int(time.time())
             labels_json = parse.quote(json.dumps(ing_label_dict).replace("\"", "'"), safe="")
             url = f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
-            print(url)
             user_hist_resp = requests.post(url)
-            print(user_hist_resp.content)
 
             # TODO labels of ingredients ENUM in inference and template
             return render_template("pages/summary.html", ing_label_dict=ing_label_dict)
