@@ -13,7 +13,7 @@ def detect_bcode(b64_str: str) -> str:
     encoded_img = b64_str.split(",")[1]
     img_arr = np.frombuffer(base64.b64decode(encoded_img), np.uint8)
     img = cv2.imdecode(img_arr, cv2.IMREAD_COLOR)
-    cv2.imwrite("test_img.png", img)
+    # cv2.imwrite("test_img.png", img) -- test
 
     decoded_objects = pyzbar.decode(img)
     if len(decoded_objects) < 1:

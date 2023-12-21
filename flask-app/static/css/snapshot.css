@@ -1,14 +1,12 @@
 #video {
     border: 1px solid black;
     box-shadow: 2px 2px 3px black;
-    width: 720px;
+    width: 319px;
   }
   
   #photo {
     border: 1px solid black;
     box-shadow: 2px 2px 3px black;
-    width: 320px;
-    height: 240px;
   }
   
   #canvas {
@@ -16,12 +14,12 @@
   }
   
   .camera {
-    width: 720px;
+    width: 320px;
     display: inline-block;
   }
   
   .output {
-    width: 720px;
+    width: 320px;
     display: inline-block;
     vertical-align: top;
   }
@@ -35,7 +33,7 @@
     background-color: white;
     color: white;
     border: none;
-    font-size: 3em;
+    font-size: 2em;
     height: 1em;
     width: 1em;
     border-radius: 50%;

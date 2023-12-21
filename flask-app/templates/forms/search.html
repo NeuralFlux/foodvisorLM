@@ -1,17 +1,26 @@
 {% extends 'layouts/search.html' %}
 {% block title %}Search{% endblock %}
 {% block content %}
-<h1>Take a snapshot of the current video stream</h1>
-Click on the Start WebCam button.
-    <p>
-    <button onclick="startWebcam();">Start WebCam</button>
-    <button onclick="stopWebcam();">Stop WebCam</button> 
-    <button onclick="snapshot();">Take Snapshot</button> 
-    </p>
-    <video onclick="snapshot(this);" width=400 height=400 id="video" controls autoplay></video>
-<p>
-    Screenshot : <p>
-    <img id="uploadImage">
-    <canvas  id="myCanvas" width="400" height="350"></canvas>
-</p></p>
+<div class="contentarea">
+    
+    <canvas id="canvas"> </canvas>
+
+    <form method="POST" class="form">
+      <div class="camera">
+        <video id="video">Video stream not available.</video>
+        <!-- give a delay for the form to be updated -->
+        <button id="startbutton" onclick="setTimeout('triggerSubmit()', 500);"> &nbsp; </button>
+      </div>
+      {{ form.csrf_token }}
+      <div class="output">
+        {{ form.barcode_image(class_ = 'form-control', required = true) }}
+      </div>
+    </form>
+  </div>
+  <script type="text/javascript">
+    function triggerSubmit() {
+      document.getElementsByClassName("form")[0].submit();
+    }
+  </script>
+  
 {% endblock %}

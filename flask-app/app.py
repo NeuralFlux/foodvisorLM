@@ -9,6 +9,7 @@ from flask_wtf import CSRFProtect
 import forms
 
 import inference
+import bcode_reader
 
 
 app = Flask(__name__)
@@ -78,10 +79,16 @@ def history():
 @app.route('/search', methods=["GET", "POST"])
 @login_required
 def search():
+    # NOTE generalize function in `snapshot.js` for form data
+    # NOTE as of now, only tested on Mozilla Firefox 120.0
     form = forms.GTINForm(request.form)
     if request.form is not None:
         if form.validate_on_submit():
-            gtin_upc = int(form.gtin.data)
+            b64_str = form.barcode_image.data
+            barcode = bcode_reader.detect_bcode(b64_str)
+
+            gtin_upc = int(barcode.rjust(14, "0"))
+            print(gtin_upc)
 
             resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v1/gtin_table?gtin_upc={gtin_upc}")
             ingredients = resp.json()["body-json"]["Item"]["ingredients"]["S"]
