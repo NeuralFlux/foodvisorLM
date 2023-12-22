@@ -8,26 +8,32 @@
 </div>
 
 {% if history %}
+    <div class="row">
     {% for product in history %}
-        <div class="list-group-item list-group-item-dark">
-            <h5 class="mb-1">{{ product.gtin_upc }}</h5>
-        </div>
-        <div class="list-group">
-            {% for ingredient, label in product.stringified_labels_json.items() %}
-            {% if label == "mostly safe" %}
-                <div class="list-group-item list-group-item-success">
-            {% elif label == "controversial" %}
-                <div class="list-group-item list-group-item-warning">
-            {% elif label == "not recommended" %}
-                <div class="list-group-item list-group-item-danger">
-            {% elif label == "unknown" %}
-                <div class="list-group-item list-group-item-secondary">
-            {% endif %}
-                <h5 class="mb-1">{{ ingredient }} - {{ label }}</h5>
+    <div class="col-md-6">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ product.gtin_upc }} - scanned at {{ product.created_at }}</h3>
             </div>
+        <ul class="list-group">
+            {% for ingredient, label in product.stringified_labels_json.items() %}
+                {% if label == "mostly safe" %}
+                    <li class="list-group-item list-group-item-success">
+                {% elif label == "controversial" %}
+                    <li class="list-group-item list-group-item-warning">
+                {% elif label == "not recommended" %}
+                    <li class="list-group-item list-group-item-danger">
+                {% elif label == "unknown" %}
+                    <li class="list-group-item list-group-item-secondary">
+                {% endif %}
+                        {{ ingredient }} - {{ label }}
+                    </li>
             {% endfor %}
+        </ul>
         </div>
+    </div>
     {% endfor %}
+    </div>
 {% else %}
     <div class="alert alert-info" role="alert">
     No history found.

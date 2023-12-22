@@ -14,6 +14,8 @@
       {{ form.csrf_token }}
       <div class="output">
         {{ form.barcode_image(class_ = 'form-control', required = true) }}
+        {{ form.barcode_val(class_ = 'form-control', placeholder = form.barcode_val.label.text) }}
+        <input type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
       </div>
     </form>
   </div>
