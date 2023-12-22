@@ -11,11 +11,12 @@ WORKDIR /app
 RUN apt-get update
 RUN apt-get install libzbar0 -y
 
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 # Copy the dependencies file to the working directory
 ADD flask-app .
-
-# Install Python dependencies
-RUN pip install -r requirements.txt
 
 # Specify the command to run on container start
 CMD [ "python", "./app.py" ]
