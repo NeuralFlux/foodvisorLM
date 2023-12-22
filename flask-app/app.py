@@ -135,12 +135,12 @@ def search():
             gtin_upc = form.barcode_val.data
 
             # look for barcode only if number is not present
-            if gtin_upc is None:
+            if gtin_upc == '':
                 b64_str = form.barcode_image.data
                 barcode = bcode_reader.detect_bcode(b64_str)
 
                 if barcode is None:
-                    flash("Invalid barcode, please try again")
+                    flash("Invalid barcode, please try again", category="error")
                     return redirect(url_for('search'))
                 gtin_upc = int(barcode.rjust(14, "0"))
 
@@ -163,9 +163,9 @@ def search():
             # add to user history
             #FIXME find stringified json alternatives
             created_at = int(time.time())
-            labels_json = parse.quote(json.dumps(ing_label_dict), safe="")
+            labels_json = parse.quote(json.dumps(ing_label_dict).replace("\"", "'"), safe="")
             url = f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
-            user_hist_resp = requests.post(url)
+            requests.post(url)
 
             # TODO labels of ingredients ENUM in inference and template
             return render_template("pages/summary.html", ing_label_dict=ing_label_dict, title=title,
