@@ -1,0 +1,7 @@
+Flask==3.0.0
+Flask-WTF==1.2.1
+openai==1.4.0
+requests==2.31.0
+pyzbar[scripts]==0.1.9
+numpy==1.26.1
+opencv-python-headless

@@ -10,10 +10,10 @@
 {% if history %}
     {% for product in history %}
         <div class="list-group-item list-group-item-dark">
-            <h5 class="mb-1">{{ product.gtin }}</h5>
+            <h5 class="mb-1">{{ product.gtin_upc }}</h5>
         </div>
         <div class="list-group">
-            {% for ingredient, label in product.labels.items() %}
+            {% for ingredient, label in product.stringified_labels_json.items() %}
             {% if label == "mostly safe" %}
                 <div class="list-group-item list-group-item-success">
             {% elif label == "controversial" %}

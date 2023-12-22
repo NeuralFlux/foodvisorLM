@@ -1,0 +1,55 @@
+#video {
+    border: 1px solid black;
+    box-shadow: 2px 2px 3px black;
+    width: 319px;
+  }
+  
+  #photo {
+    border: 1px solid black;
+    box-shadow: 2px 2px 3px black;
+  }
+  
+  #canvas {
+    display: none;
+  }
+  
+  .camera {
+    width: 320px;
+    display: inline-block;
+  }
+  
+  .output {
+    width: 320px;
+    display: inline-block;
+    vertical-align: top;
+  }
+  
+  #startbutton {
+    display: block;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    bottom: 1.4em;
+    background-color: white;
+    color: white;
+    border: none;
+    font-size: 2em;
+    height: 1em;
+    width: 1em;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: solid white;
+    outline-offset: 0.1em;
+  }
+
+  #startbutton:active {
+    transform: translateY(2px);
+  }
+  
+  .contentarea {
+    font-size: 16px;
+    font-family: "Lucida Grande", "Arial", sans-serif;
+    width: 760px;
+  }
+  

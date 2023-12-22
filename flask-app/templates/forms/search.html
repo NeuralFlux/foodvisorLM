@@ -1,12 +1,26 @@
-{% extends 'layouts/main.html' %}
+{% extends 'layouts/search.html' %}
 {% block title %}Search{% endblock %}
 {% block content %}
-  <form method="POST" class="form">
-    {{ form.csrf_token }}
-    {{ form.gtin(class_ = 'form-control first-input', placeholder = form.gtin.label.text, required = true, autofocus = true) }}
-    <input type="submit" value="Submit" class="btn btn-primary btn-lg btn-block">
-  </form>
-  {% if ingredients %}
-    <h1>{{ ingredients }}</h1>
-  {% endif %}
+<div class="contentarea">
+    
+    <canvas id="canvas"> </canvas>
+
+    <form method="POST" class="form">
+      <div class="camera">
+        <video id="video">Video stream not available.</video>
+        <!-- give a delay for the form to be updated -->
+        <button id="startbutton" onclick="setTimeout('triggerSubmit()', 500);"> &nbsp; </button>
+      </div>
+      {{ form.csrf_token }}
+      <div class="output">
+        {{ form.barcode_image(class_ = 'form-control', required = true) }}
+      </div>
+    </form>
+  </div>
+  <script type="text/javascript">
+    function triggerSubmit() {
+      document.getElementsByClassName("form")[0].submit();
+    }
+  </script>
+  
 {% endblock %}
