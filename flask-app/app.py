@@ -32,6 +32,22 @@ def login_required(f):
 
     return login_enforcer
 
+def get_sanitized_redirect_url(source, dest):
+    """generates a safe URL for the AUTH_ENDPOINT payload
+    based on source URL protocol
+
+    Args:
+        source (str): request.url
+        dest (str): url_for(<REDIRECTION DESTINATION>)
+    """
+    parsed_url = parse.urlparse(source)
+    scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
+    safe_redirect_url = parse.quote(
+        f"{scheme}://{parsed_url.netloc}{dest}",
+        safe=""
+    )
+
+    return safe_redirect_url
 
 @app.route('/')
 def index():
@@ -41,46 +57,39 @@ def index():
 @app.route('/login')
 def login():
     if "code" in request.args:
-        # TODO modularize
+        # store user session vars and email
         auth_code = request.args.get("code")
-        url = "https://foodvisor-lm.auth.us-east-1.amazoncognito.com/oauth2/token"
-
-        parsed_url = parse.urlparse(request.url)
-        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
-        safe_redirect_url = parse.quote(
-            f"{scheme}://{parsed_url.netloc}{url_for('login')}",
-            safe=""
+        url = f"{app.config.get('AUTH_ENDPOINT')}/oauth2/token"
+        safe_redirect_url = get_sanitized_redirect_url(
+            source=request.url,
+            dest=url_for('login')
         )
 
-        payload = f'client_id=4fsa9c9emuj8up23oekojflnt8&grant_type=authorization_code&redirect_uri={safe_redirect_url}&code={auth_code}'
+        payload = f'client_id={app.config.get("AUTH_CLIENT_ID")}&grant_type=authorization_code&redirect_uri={safe_redirect_url}&code={auth_code}'
         headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded'
         }
-
         response = requests.request("POST", url, headers=headers, data=payload).json()
 
         session["id_token"] = response["id_token"]
         session["access_token"] = response["access_token"]
         session["refresh_token"] = response["refresh_token"]
 
-        url = "https://foodvisor-lm.auth.us-east-1.amazoncognito.com/oauth2/userInfo"
+        url = f"{app.config.get('AUTH_ENDPOINT')}/oauth2/userInfo"
         headers = {
             'Authorization': f'Bearer {session["access_token"]}'
         }
         response = requests.request("GET", url, headers=headers, data={}).json()
-
         session["email"] = response["email"]
 
         return redirect(url_for('search'))
     else:
-        parsed_url = parse.urlparse(request.url)
-        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
-        safe_redirect_url = parse.quote(
-            f"{scheme}://{parsed_url.netloc}{url_for('login')}",
-            safe=""
+        safe_redirect_url = get_sanitized_redirect_url(
+            source=request.url,
+            dest=url_for('login')
         )
 
-        return redirect(f"https://foodvisor-lm.auth.us-east-1.amazoncognito.com/login?client_id=4fsa9c9emuj8up23oekojflnt8&response_type=code&scope=email+openid&redirect_uri={safe_redirect_url}")
+        return redirect(f"{app.config.get('AUTH_ENDPOINT')}/login?client_id={app.config.get('AUTH_CLIENT_ID')}&response_type=code&scope=email+openid&redirect_uri={safe_redirect_url}")
 
 
 @app.route('/logout')
@@ -92,20 +101,16 @@ def logout():
         session.pop("access_token")
         session.pop("refresh_token")
 
-        parsed_url = parse.urlparse(request.url)
-        scheme = SCHEME_DICT.get(parsed_url.netloc, 'https')
-        safe_redirect_url = parse.quote(
-            f"{scheme}://{parsed_url.netloc}{url_for('index')}",
-            safe=""
+        safe_redirect_url = get_sanitized_redirect_url(
+            source=request.url,
+            dest=url_for('index')
         )
-        return redirect(f"https://foodvisor-lm.auth.us-east-1.amazoncognito.com/logout?client_id=4fsa9c9emuj8up23oekojflnt8&logout_uri={safe_redirect_url}")
-
-
+        return redirect(f"{app.config.get('AUTH_ENDPOINT')}/logout?client_id={app.config.get('AUTH_CLIENT_ID')}&logout_uri={safe_redirect_url}")
 
 @app.route('/history')
 @login_required
 def history():
-    resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}")
+    resp = requests.get(f"{app.config.get('API_ENDPOINT')}/history?user_email={session['email']}")
     history = resp.json()["Items"]
 
     # sample DynamoDB response
@@ -144,17 +149,17 @@ def search():
                     return redirect(url_for('search'))
                 gtin_upc = int(barcode.rjust(14, "0"))
 
-            resp = requests.get(f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/gtin_table?gtin_upc={gtin_upc}")
+            resp = requests.get(f"{app.config.get('API_ENDPOINT')}/gtin-table?gtin_upc={gtin_upc}")
             resp_json = resp.json()
 
-            if "Item" not in resp_json["body-json"].keys():
+            if "Item" not in resp_json.keys():
                 return render_template("pages/summary.html")
 
-            ingredients = resp_json["body-json"]["Item"]["ingredients"]["S"]
+            ingredients = resp_json["Item"]["ingredients"]["S"]
             title = {
-                "owner": resp_json["body-json"]["Item"]["brand_owner"]["S"],
-                "name": resp_json["body-json"]["Item"]["brand_name"]["S"],
-                "subbrand": resp_json["body-json"]["Item"]["subbrand_name"]["S"],
+                "owner": resp_json["Item"]["brand_owner"]["S"],
+                "name": resp_json["Item"]["brand_name"]["S"],
+                "subbrand": resp_json["Item"]["subbrand_name"]["S"],
             }
 
             lang_model_resp = inference.get_lang_model_response(ingredients)
@@ -164,7 +169,7 @@ def search():
             #FIXME find stringified json alternatives
             created_at = int(time.time())
             labels_json = parse.quote(json.dumps(ing_label_dict).replace("\"", "'"), safe="")
-            url = f"https://wnpwytxwol.execute-api.us-east-1.amazonaws.com/v2/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
+            url = f"{app.config.get('API_ENDPOINT')}/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
             requests.post(url)
 
             # TODO labels of ingredients ENUM in inference and template
