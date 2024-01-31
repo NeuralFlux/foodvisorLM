@@ -1,0 +1,248 @@
+---
+swagger: "2.0"
+info:
+  version: "2024-01-31T03:28:18Z"
+  title: "foodvisorLM"
+host: "<api-endpoint>"
+basePath: "/v2"
+schemes:
+- "https"
+paths:
+  /gtin-table:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "gtin_upc"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        type: "aws"
+        credentials: "arn:aws:iam::<account-id>:role/foodvisor-lm-api"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/GetItem"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.querystring.gtin_upc: "method.request.querystring.gtin_upc"
+        requestTemplates:
+          application/json: "{\n    \"TableName\": \"gtin-lookup-table\",\n    \"\
+            Key\": {\n        \"gtin_upc\": {\n            \"N\": \"$input.params('gtin_upc')\"\
+            \n        }\n    }\n}"
+        passthroughBehavior: "when_no_match"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+  /history:
+    get:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "user_email"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        type: "aws"
+        credentials: "arn:aws:iam::<account-id>:role/foodvisor-lm-api"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/Query"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.querystring.user_email: "method.request.querystring.user_email"
+        requestTemplates:
+          application/json: "{\n    \"TableName\": \"UserHistory\",\n    \"KeyConditionExpression\"\
+            : \"user_email = :u\",\n    \"ExpressionAttributeValues\": {\n       \
+            \ \":u\": {\"S\": \"$input.params('user_email')\"}\n    },\n    \"ScanIndexForward\"\
+            : false,\n    \"Limit\": 5\n}"
+        passthroughBehavior: "when_no_match"
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "created_at"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "gtin_upc"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "stringified_labels_json"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "user_email"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        type: "aws"
+        credentials: "arn:aws:iam::<account-id>:role/foodvisor-lm-api"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/PutItem"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.querystring.created_at: "method.request.querystring.created_at"
+          integration.request.querystring.user_email: "method.request.querystring.user_email"
+          integration.request.querystring.gtin_upc: "method.request.querystring.gtin_upc"
+          integration.request.querystring.stringified_labels_json: "method.request.querystring.stringified_labels_json"
+        requestTemplates:
+          application/json: "{\n    \"TableName\": \"UserHistory\",\n    \"Item\"\
+            : {\n        \"user_email\": {\n            \"S\": \"$input.params('user_email')\"\
+            \n        },\n        \"created_at\": {\n            \"N\": \"$input.params('created_at')\"\
+            \n        },\n        \"gtin_upc\": {\n            \"S\": \"$input.params('gtin_upc')\"\
+            \n        },\n        \"stringified_labels_json\": {\n            \"S\"\
+            : \"$input.params('stringified_labels_json')\"\n        }\n    }\n}"
+        passthroughBehavior: "when_no_match"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+  /similar-products:
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "product_text"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "Authorization"
+        in: "header"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+      x-amazon-apigateway-integration:
+        type: "http"
+        httpMethod: "POST"
+        uri: "<opensearch-index-search-endpoint>"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.Authorization: "method.request.header.Authorization"
+        requestTemplates:
+          application/json: "{\n  \"_source\": {\n    \"excludes\": [\n      \"product_embedding\"\
+            \n    ]\n  },\n  \"query\": {\n    \"neural\": {\n      \"product_embedding\"\
+            : {\n        \"query_text\": \"$input.params('product_text')\",\n    \
+            \    \"model_id\": \"pMlJXY0BaFGZakfvm76x\",\n        \"k\": 3\n     \
+            \ }\n    }\n  }\n}"
+        passthroughBehavior: "when_no_match"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+definitions:
+  Empty:
+    type: "object"
+    title: "Empty Schema"
