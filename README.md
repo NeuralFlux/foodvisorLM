@@ -7,6 +7,21 @@ While I find [Yuka](https://yuka.io/en/) very useful for this, I started this pr
 1) How can the recent advances in NLP help summarize research in health and food science per ingredient?
 2) Since the ratings by a human expert may induce bias, is a qualitative stance better than Yuka's rating system?
 
+### Setting up
+Prerequisite - Set all the environment variables in [env.list](/env.list)
+```bash
+git clone https://github.com/NeuralFlux/foodvisorLM
+cd foodvisorLM
+pip install -r requirements.txt
+cd flask-app/
+flask --app app.py --debug run
+
+# build Docker image
+cd ..
+docker build -t fvsr-lm .
+docker run --env-file env.list -p 5000:5000 fvsr-lm
+```
+
 ### Architecture Diagram
 ![Architecture diagram of this project comprising various AWS services](/assets/foodvisorLM_arch.png)
 
