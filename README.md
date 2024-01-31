@@ -22,6 +22,14 @@ docker build -t fvsr-lm .
 docker run --env-file env.list -p 5000:5000 fvsr-lm
 ```
 
+### Sample Data
+Use this data to test the barcode scanner or the search feature.
+| Product Code | Image | Name | Description | Ingredients |
+| --- | --- | --- | --- | --- |
+| 8904063230126 | ![barcode 8904063230126](/assets/sample_barcodes/8904063230126.jpg) | Haldiram's Navrattan | Spicy snacks mixture of split chickpeas, peanuts, and sundried potato chips | chickpeas flour, vegetable oil (cotton seed, corn, palmolein), puy lentil, peanuts, acidity regulator [citric acid powder (E330)], anticaking agent [silicon dioxide (E551)]
+| 074570014002 | ![barcode 074570014002](/assets/sample_barcodes/074570014002.jpg) | Haagen-Dazs | chocolate ice cream, chocolate | cream, skim milk, cane sugar, cocoa processed with alkali, egg yolks
+| 054467050351 | ![barcode 054467050351](/assets/sample_barcodes/054467050351.jpg) | Starbucks | double chocolate hot cocoa mix, double chocolate | cane sugar, cocoa, cocoa (processed with alkali), dark chocolate (sugar, chocolate mass, cocoa butter, soy lecithin), natural vanilla flavor
+
 ### Architecture Diagram
 ![Architecture diagram of this project comprising various AWS services](/assets/foodvisorLM_arch.png)
 
