@@ -9,3 +9,7 @@ class GTINForm(FlaskForm):
             Regexp("^[0-9]*$")
     ])
     barcode_image = HiddenField('barcode')
+
+class SimilarityForm(FlaskForm):
+    gtin_upc = HiddenField()
+    product_text = HiddenField()

@@ -4,6 +4,8 @@ import requests
 from urllib import parse
 import time
 from datetime import datetime
+import re
+import base64
 
 from functools import wraps
 from flask import Flask, flash, render_template, request, session, url_for, redirect
@@ -106,6 +108,33 @@ def logout():
             dest=url_for('index')
         )
         return redirect(f"{app.config.get('AUTH_ENDPOINT')}/logout?client_id={app.config.get('AUTH_CLIENT_ID')}&logout_uri={safe_redirect_url}")
+    
+
+@app.route('/similar_products', methods=["POST"])
+@login_required
+def similar_products():
+    # sanitize and regex product_text for only alnum
+    # commas, dashes, slashes
+    # basic auth
+    # deploy endpoint
+    gtin_upc = int(request.form.get('gtin_upc'))
+    product_text = re.sub(r'[^a-zA-Z0-9, &-/]', '', request.form.get('product_text'))
+
+    opensearch_user = app.config.get('OPENSEARCH_USER')
+    opensearch_pwd = app.config.get('OPENSEARCH_PWD')
+    base64_str = base64.b64encode(f"{opensearch_user}:{opensearch_pwd}".encode('utf-8')).decode()
+    headers = {
+        'Authorization': f'Basic {base64_str}'
+    }
+
+    product_text = parse.quote(product_text)
+    resp = requests.post(f"{app.config.get('API_ENDPOINT')}/similar-products?product_text={product_text}", headers=headers)
+    resp_json = resp.json()
+    products = []
+    if "hits" in resp_json.keys() and len(resp_json["hits"]["total"]) > 0:
+        products = resp_json["hits"]["hits"][1:4]
+    return render_template('pages/similar_products.html', gtin=gtin_upc, products=products)
+
 
 @app.route('/history')
 @login_required
@@ -124,7 +153,7 @@ def history():
                 # FIXME json string alternatives
                 history[idx][key] = json.loads(parse.unquote(history[idx][key]).replace("'", "\""))
             elif key == "created_at":
-                history[idx][key] = datetime.fromtimestamp(int(history[idx][key])).strftime('%H:%M:%S on %d %B, %Y')
+                history[idx][key] = datetime.fromtimestamp(int(history[idx][key]) - 3600 * 5).strftime('%H:%M:%S on %d %B, %Y')
 
     return render_template('pages/history.html', history=history)
 
@@ -135,6 +164,7 @@ def search():
     # NOTE generalize function in `snapshot.js` for form data
     # NOTE as of now, only tested on Mozilla Firefox 120.0
     form = forms.GTINForm(request.form)
+    similarity_form = forms.SimilarityForm()
     if request.form is not None:
         if form.validate_on_submit():
             gtin_upc = form.barcode_val.data
@@ -160,6 +190,8 @@ def search():
                 "owner": resp_json["Item"]["brand_owner"]["S"],
                 "name": resp_json["Item"]["brand_name"]["S"],
                 "subbrand": resp_json["Item"]["subbrand_name"]["S"],
+                "description": resp_json["Item"]["description"]["S"],
+                "ingredients": resp_json["Item"]["ingredients"]["S"]
             }
 
             lang_model_resp = inference.get_lang_model_response(ingredients)
@@ -172,9 +204,12 @@ def search():
             url = f"{app.config.get('API_ENDPOINT')}/history?user_email={session['email']}&created_at={created_at}&gtin_upc={gtin_upc}&stringified_labels_json={labels_json}"
             requests.post(url)
 
+            similarity_form.gtin_upc.data = gtin_upc
+            similarity_form.product_text.data = title["description"] + " " + title["ingredients"]
+
             # TODO labels of ingredients ENUM in inference and template
             return render_template("pages/summary.html", ing_label_dict=ing_label_dict, title=title,
-                                   gtin_upc=gtin_upc)
+                                   gtin_upc=gtin_upc, form=similarity_form)
 
     return render_template("forms/search.html", form=form)
 
