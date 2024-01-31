@@ -1,3 +1,10 @@
+# AWS Services
+containers.json
+public-endpoint.json
+env.list
+utils/
+sagemaker/msmarco-distilbert-base-tas-b
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
