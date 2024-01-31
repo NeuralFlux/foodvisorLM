@@ -30,6 +30,14 @@
         </ul>
         </div>
     </div>
+    <div class="col-md-6">
+        <form method="POST" class="form" action="/similar_products">
+            {{ form.csrf_token }}
+            {{ form.gtin_upc }}
+            {{ form.product_text }}
+            <button type="submit" class="btn btn-primary m-2">View Similar Products</button>
+        </form>
+    </div>
     </div>
     {% else %}
     <div class="alert alert-info" role="alert">
