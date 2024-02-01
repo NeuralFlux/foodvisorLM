@@ -18,5 +18,13 @@ RUN pip install -r requirements.txt
 # Copy the dependencies file to the working directory
 ADD flask-app .
 
+# Add environment variables
+ARG OPENAI_API_KEY
+ARG AUTH_ENDPOINT
+ARG AUTH_CLIENT_ID
+ARG API_ENDPOINT
+ARG OPENSEARCH_USER
+ARG OPENSEARCH_PWD
+
 # Specify the command to run on container start
 CMD [ "python", "./app.py" ]
