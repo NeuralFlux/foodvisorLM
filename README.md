@@ -7,6 +7,8 @@ While I find [Yuka](https://yuka.io/en/) very useful for this, I started this pr
 1) How can the recent advances in NLP help summarize research in health and food science per ingredient?
 2) Since the ratings by a human expert may induce bias, is a qualitative stance better than Yuka's rating system?
 
+Data is fetched from the [US Department of Agriculture](https://fdc.nal.usda.gov/download-datasets.html) archive. A subset is derived based on popular brands like Haagen-Dazs and Starbucks; look at [products](/assets/products_info.csv) for the list of all supported products.
+
 ### Setting up
 Prerequisite - Set all the environment variables in [env.list](/env.list)
 ```bash
