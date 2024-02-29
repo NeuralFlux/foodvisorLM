@@ -1,6 +1,6 @@
 # FoodvisorLM 🍎
 A webapp to find potentially harmful ingredients in packaged food and find similar products built using AWS OpenSearch, SageMaker, DynamoDB, Cognito, Docker, Flask, and OpenAI API.
-[Website](https://foodvisor-lm-service.hqr6aeehu3q28.us-east-1.cs.amazonlightsail.com/)
+[Demo](https://www.linkedin.com/posts/anudeep-tubati_ai-machinelearning-cloudcomputing-activity-7158624067665711105-5doF?utm_source=share&utm_medium=member_desktop)
 
 ### Sample Data
 Use this data to test the barcode scanner or the search feature.
