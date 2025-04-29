@@ -56,7 +56,7 @@ Product barcode data is largely structured and contains millions of rows, hence 
 This is a part of my project for Cloud Computing and Big Data at New York University, Fall 2023 taught by Prof. Sambit Sahu.
 
 ### References
-1. A. Hill, “What AWS service should you use to publish a web site?, ” https://adrianhall.github.io/cloud/2019/01/31/which-aws-service-for-hosting/
+1. A. Hall, “What AWS service should you use to publish a web site?, ” https://adrianhall.github.io/cloud/2019/01/31/which-aws-service-for-hosting/
 2. OpenAI, “Chat Completion API Documentation, ” https://platform.openai.com/docs/guides/text-generation/chat-completions-api
 3. AWS, “AWS Documentation, ” https://docs.aws.amazon.com/index.html
 4. Julie, François, Benoı̂t, “Yuka Blog, ” https://yuka.io/en/
